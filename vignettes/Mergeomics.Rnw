@@ -75,12 +75,15 @@ Mergeomics package from
 
 http://mergeomics.research.idre.ucla.edu/Download/Package/
 
-Mergeomics\textunderscore 0.99.1.tar.gz 
+Mergeomics\textunderscore 1.1.1.tar.gz 
 and install it using the following commands: 
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
-# install.packages("Mergeomics_0.99.1.tar.gz", repos = NULL, 
-# type="source")
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+install.packages("Mergeomics_1.1.1.tar.gz", repos = NULL, 
+type="source")
+## or from bioconductor3.3 release, use following lines:
+# source("https://bioconductor.org/biocLite.R")
+# biocLite("Mergeomics")
 @
 
 However, if you want, you can also try out these examples with our webserver at
@@ -140,100 +143,150 @@ the dataset.
 
 \subsection{One-step Mergeomics}
 
-Here, we first provide an one-step way to run the whole pipeline. Then, the 
-step-by-step processing will be described in detail in separate sections.
+In this section, we first provide an one-step way to run the whole pipeline.
+One-step running of the pipeline can be accomplished either with a built-in
+function including all function calls in it or by explicitly calling/running
+all the required functions related with the pipeline processes one-by-one 
+sequentially.
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
+We demonstrated the either ways of one-step Mergeomics pipeline with the 
+code chunks given in this section. Then, the step-by-step processing of
+the pipeline will be described in detail in separate sections.
+
+The first way of one-step pipeline calling is given in the following 
+code chunk. It is achieved by one built-in function call (MSEA.KDA.onestep).
+
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
-#######    One-step analysis for Mergeomics       #########
+#######    One-step analysis for Mergeomics - 1st way    ##
 ###########################################################
 ## Import library scripts.
-# library(Mergeomics)
+library(Mergeomics)
+
+## first, give the module info file, genefile, marker file, and network file
+## paths for the pipeline
+plan <- list()
+plan$label <- "hdlc"
+plan$folder <- "Results"
+plan$genfile <- system.file("extdata", 
+"genes.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
+plan$marfile <- system.file("extdata", 
+"marker.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
+plan$modfile <- system.file("extdata", 
+"modules.mousecoexpr.liver.human.txt", package="Mergeomics")
+plan$inffile <- system.file("extdata", 
+"coexpr.info.txt", package="Mergeomics")
+plan$netfile <- system.file("extdata", 
+"network.mouseliver.mouse.txt", package="Mergeomics")
+
+## second, define pipeline parameters (e.g. permutation #, seed for random #
+## generator, min and max module sizes, max overlapping ratio, etc.)
+plan$nperm <- 100 ## default value is 20000
+
+## then, call the one-step pipeline function including both MSEA and KDA steps
+plan <- MSEA.KDA.onestep(plan, apply.MSEA=TRUE, apply.KDA=TRUE, 
+maxoverlap.genesets=0.33, symbol.transfer.needed=TRUE, 
+sym.from=c("HUMAN", "MOUSE"), sym.to=c("HUMAN", "MOUSE"))
+@
+
+The second way of one-step pipeline calling is given in the following 
+code chunk. Here, we need to explicitly and sequentially call main functions
+of both MSEA and KDA processes.
+
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+###########################################################
+#######    One-step analysis for Mergeomics - 2nd way    ##
+###########################################################
+## Import library scripts.
+library(Mergeomics)
 ################ MSEA (Marker set enrichment analysis)  ###
-# job.msea <- list()
-# job.msea$label <- "hdlc"
-# job.msea$folder <- "Results"
-# job.msea$genfile <- system.file("extdata", 
-# "genes.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
-# job.msea$marfile <- system.file("extdata", 
-# "marker.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
-# job.msea$modfile <- system.file("extdata", 
-# "modules.mousecoexpr.liver.human.txt", package="Mergeomics")
-# job.msea$inffile <- system.file("extdata", "coexpr.info.txt", 
-# package="Mergeomics")
-# job.msea <- ssea.start(job.msea)
-# job.msea <- ssea.prepare(job.msea)
-# job.msea <- ssea.control(job.msea)
-# job.msea <- ssea.analyze(job.msea)
-# job.msea <- ssea.finish(job.msea)
+job.msea <- list()
+job.msea$label <- "hdlc"
+job.msea$folder <- "Results"
+job.msea$genfile <- system.file("extdata", 
+"genes.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
+job.msea$marfile <- system.file("extdata", 
+"marker.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
+job.msea$modfile <- system.file("extdata", 
+"modules.mousecoexpr.liver.human.txt", package="Mergeomics")
+job.msea$inffile <- system.file("extdata", "coexpr.info.txt", 
+package="Mergeomics")
+job.msea <- ssea.start(job.msea)
+job.msea <- ssea.prepare(job.msea)
+job.msea <- ssea.control(job.msea)
+job.msea <- ssea.analyze(job.msea)
+job.msea <- ssea.finish(job.msea)
 #########  Create intermediary datasets for KDA ###########
-# syms <- tool.read(system.file("extdata", "symbols.txt", 
-# package="Mergeomics"))
-# syms <- syms[,c("HUMAN", "MOUSE")]
-# names(syms) <- c("FROM", "TO")
-# job.kda <- ssea2kda(job.msea, symbols=syms)
+syms <- tool.read(system.file("extdata", "symbols.txt", 
+package="Mergeomics"))
+syms <- syms[,c("HUMAN", "MOUSE")]
+names(syms) <- c("FROM", "TO")
+job.kda <- ssea2kda(job.msea, symbols=syms)
 #######   wKDA (Weighted key driver analysis)    ##########
-# job.kda$netfile <- system.file("extdata", 
-# "network.mouseliver.mouse.txt", package="Mergeomics")
-# job.kda <- kda.configure(job.kda)
-# job.kda <- kda.start(job.kda)
-# job.kda <- kda.prepare(job.kda)
-# job.kda <- kda.analyze(job.kda)
-# job.kda <- kda.finish(job.kda)
+job.kda$netfile <- system.file("extdata", 
+"network.mouseliver.mouse.txt", package="Mergeomics")
+job.kda <- kda.configure(job.kda)
+job.kda <- kda.start(job.kda)
+job.kda <- kda.prepare(job.kda)
+job.kda <- kda.analyze(job.kda)
+job.kda <- kda.finish(job.kda)
 ######  Prepare network files for visualization   #########
 ## Creates the input files for Cytoscape (http://www.cytoscape.org/)
-# job.kda <- kda2cytoscape(job.kda)
+job.kda <- kda2cytoscape(job.kda)
 @
+
+
+After that, we focused on each pipeline process in the following sections.
 
 \subsection{Marker set enrichment analysis (MSEA)}
 The purpose of the MSEA is to leverage genome/epigenome wide association data,
 function genomics, canonical pathways and/or data-driven gene modules for 
 identifying causal subnetworks for disease/traits.
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 ## Import Mergeomics library.
-# library("Mergeomics")
+library("Mergeomics")
 ## create an empty list for setting parameters
-# job.msea <- list()
+job.msea <- list()
 ## Next, label your project
-# job.msea$label <- "HDLC"
+job.msea$label <- "HDLC"
 ## The pathway size varies from 1 to a few thousands and will
 ## introduce bias to the analysis. We set criteria for the 
 ## min. (mingenes) and max. (maxgenes) gene size for the pathways.
-# job.msea$maxgenes <- 500
-# job.msea$mingenes <- 10
+job.msea$maxgenes <- 500
+job.msea$mingenes <- 10
 ## set the output folder
-# job.msea$folder <- "./Result"
+job.msea$folder <- "./Results"
 ## The parameter genfile defines the Marker-to-Gene mapping file
 ## It contains two columns, GENE and MARKER, delimited by tab 
-# job.msea$genfile <- system.file("extdata", 
-# "genes.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
+job.msea$genfile <- system.file("extdata", 
+"genes.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
 ## The parameter marfile defines the Disease association data file
 ## It contains two columns, MARKER and VALUE, delimited by tab
 ## Here, the marfile comes from the GWAS file after marker 
 ## dependency pruning, so the VALUE is the minus log10 transformed
-# job.msea$marfile <- system.file("extdata", 
-# "marker.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
+job.msea$marfile <- system.file("extdata", 
+"marker.hdlc_040kb_ld70.human_eliminated.txt", package="Mergeomics")
 ## The modfile defines the pathway information, which could come 
 ## from knowledge-based databases (such as KEGG, and Reactome) 
 ## or data-driven data sets (such as co-expression modules).
 ## It contains two columns, MOUDLE and GENE, delimited by tab
-# job.msea$modfile <- system.file("extdata", 
-# "modules.mousecoexpr.liver.human.txt", package="Mergeomics")
+job.msea$modfile <- system.file("extdata", 
+"modules.mousecoexpr.liver.human.txt", package="Mergeomics")
 ## The inffile provides the basic descriptions for the pathways
 ## It contains three columns, MODULE, SOURCE, and DESCR, which 
 ## provide information for pathway IDs corresponding to the 
 ## pathway names in modfile, the sources of the pathways, and
 ## pathway annotations
-# job.msea$inffile <- system.file("extdata", "coexpr.info.txt", 
-# package="Mergeomics")
+job.msea$inffile <- system.file("extdata", "coexpr.info.txt", 
+package="Mergeomics")
 ## Then, MSEA will run for ~30 minutes to ~2 hours
-# job.msea <- ssea.start(job.msea)
-# job.msea <- ssea.prepare(job.msea)
-# job.msea <- ssea.control(job.msea)
-# job.msea <- ssea.analyze(job.msea)
-# job.msea <- ssea.finish(job.msea)
+job.msea <- ssea.start(job.msea)
+job.msea <- ssea.prepare(job.msea)
+job.msea <- ssea.control(job.msea)
+job.msea <- ssea.analyze(job.msea)
+job.msea <- ssea.finish(job.msea)
 ###########################################################
 @
 
@@ -257,7 +310,7 @@ identifying causal subnetworks for disease/traits.
 \end{tabular}
 \end{table}
 
-Part of the original result is listed in Table 1. The pathways 
+A part of the original results is listed in Table 1. The pathways 
 satisfying certain cutoffs (e.g. FDR\textless 30\%) will be used for the next
 step and can be further annotated using diverse tools, such as DAVID 
 (http://david.abcc.ncifcrf.gov/). 
@@ -266,36 +319,44 @@ step and can be further annotated using diverse tools, such as DAVID
 
 Usually, pathways/modules collected from different sources will have certain 
 degree of redundancies, or refer to the same processes. In this case, users 
-could merge the disease-related pathways into relatively independent gene sets
-after running MSEA.
+could merge the disease-related pathways into relatively independent gene 
+sets, which exceed a given FDR cutoff after running MSEA.
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
-# job <-list()
-# job$folder <- c("module_merge")
-## The moddata and modinfo come from the significant pathways
-## in MSEA
-# moddata <- tool.read("PATHtoDATAFILES/Significant_pathways.txt", 
-# c("MODULE","GENE"))
-# modinfo <- tool.read("PATHtoDATAFILES/Significant_pathways.info.txt",
-# c("MODULE","SOURCE","DESCR"))
+job <-list()
+job$folder <- c("module_merge")
+## The moddata and modinfo come from the significant pathways in MSEA
+## It is recommended to merge the overlapping pathways among significant
+## ones before applying KDA to provide proceeding with independent gene sets
+moddata <- tool.read(system.file("extdata", "Significant_pathways.txt",
+package="Mergeomics"), c("MODULE","GENE"))
+
+syms <- tool.read(system.file("extdata", "symbols.txt", 
+package="Mergeomics"))
+syms <- syms[,c("HUMAN", "MOUSE")]
+names(syms) <- c("FROM", "TO")
+moddata$GENE <- tool.translate(words=moddata$GENE, from=syms$FROM,
+to=syms$TO)
+
 ## Merge and trim overlapping modules.
-# rmax <- 0.2
-# moddata$OVERLAP <- moddata$MODULE
-# moddata <- tool.coalesce(items=moddata$GENE, groups=moddata$MODULE, 
-# rcutoff=rmax)
-# moddata$MODULE <- moddata$CLUSTER
-# moddata$GENE <- moddata$ITEM
-# moddata$OVERLAP <- moddata$GROUPS
-# moddata <- moddata[,c("MODULE", "GENE", "OVERLAP")]
-# moddata <- unique(moddata)
+rmax <- 0.2
+moddata$OVERLAP <- moddata$MODULE
+moddata <- tool.coalesce(items=moddata$GENE, groups=moddata$MODULE, 
+rcutoff=rmax)
+moddata$MODULE <- moddata$CLUSTER
+moddata$GENE <- moddata$ITEM
+moddata$OVERLAP <- moddata$GROUPS
+moddata <- moddata[,c("MODULE", "GENE", "OVERLAP")]
+moddata <- unique(moddata)
 ## Mark modules with overlaps.
-# for(i in which(moddata$MODULE != moddata$OVERLAP))
-#     moddata[i,"MODULE"] <- paste(moddata[i,"MODULE"], "..", sep=",")
+for(i in which(moddata$MODULE != moddata$OVERLAP))
+    moddata[i,"MODULE"] <- paste(moddata[i,"MODULE"], "..", sep=",")
 ## Save module info for KDA.
-# modfile <- "merged_modules.txt"
-# tool.save(frame=unique(moddata[,c("MODULE", "GENE", "OVERLAP")]),
-# file=modfile, directory=job$folder)
+modfile <- "mergedModules.txt"
+moddata$NODE <- moddata$GENE
+tool.save(frame=unique(moddata[,c("MODULE", "GENE", "OVERLAP", "NODE")]),
+file=modfile, directory=job$folder)
 ###########################################################
 @
 
@@ -311,7 +372,7 @@ association studies of different ethnicity, platform or even species, while
 evading the technical difficulties when performing meta-analysis directly 
 on the marker-level association data.
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 ## Assume there are three MSEA objects passed down by 
 ## ssea.finish()
@@ -332,35 +393,39 @@ In specific, wKDA first screen the network for candidate hub genes. Then
 the disease gene-sets are overlaid onto the subnetworks of the candidate
 hubs to identify key drivers whose neighbors are enriched with disease genes.
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
-# job.kda <- list()
-# job.kda$label<-"HDLC"
+job.kda <- list()
+job.kda$label<-"HDLC"
 ## parent folder for results
-# job.kda$folder<-"./Results"
+job.kda$folder<-"./Results"
 ## Input a network
 ## columns: TAIL HEAD WEIGHT
-# system.file("extdata", "network.mouseliver.mouse.txt", 
-# package="Mergeomics")
+job.kda$netfile <- system.file("extdata", "network.mouseliver.mouse.txt", 
+package="Mergeomics")
 ## Gene sets derived from ModuleMerge, containing two columns,
 ## MODULE, NODE, delimited by tab 
-# job.kda$modfile<-"HDLC_Combined.txt"
+job.kda$modfile<- system.file("extdata", 
+"mergedModules.txt", package="Mergeomics")
 ## Annotation file for the gene sets
-# job.kda$inffile<-"HDLC_Combined.anno.txt"
+## if module or pathway annotation is not available, skip this:
+job.kda$inffile<-system.file("extdata", 
+"mergedModules.info.txt", package="Mergeomics")
 ## "0" means we do not consider edge weights while 1 is 
 ## opposite.
-# job.kda$edgefactor<-0.0
+job.kda$edgefactor<-0.0
 ## The searching depth for the KDA
-# job.kda$depth<-1
+job.kda$depth<-1
 ## "0" means we do not consider the directions of the 
 ## regulatory interactions
 ## while 1 is opposite.
-# job.kda$direction<-0
+job.kda$direction<-0
 ## Let us run KDA!
-# job.kda <- kda.start(job.kda)
-# job.kda <- kda.prepare(job.kda)
-# job.kda <- kda.analyze(job.kda)
-# job.kda <- kda.finish(job.kda)
+job.kda <- kda.configure(job.kda)
+job.kda <- kda.start(job.kda)
+job.kda <- kda.prepare(job.kda)
+job.kda <- kda.analyze(job.kda)
+job.kda <- kda.finish(job.kda)
 ###########################################################
 @
 
@@ -410,8 +475,10 @@ hence, only the directly connected neighbor nodes of key drivers are taken
 into account).
 \end{itemize}
 
-<<echo=TRUE,print=FALSE,eval=TRUE>>=
+<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
+## run following line after finishing the KDA process
+## i.e., after the kda.finish() function concluded
 # job.kda <- kda2cytoscape (job.kda, node.list=NULL, 
 # modules=NULL, ndrivers=5, depth=1)
 ###########################################################

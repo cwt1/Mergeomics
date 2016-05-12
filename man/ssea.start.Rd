@@ -15,7 +15,7 @@ ssea.start(plan)
 label: unique identifier for the analysis
 folder: output folder for results
 modfile: path to module file (cols: MODULE GENE)
-locfile: path to marker file (cols: LOCUS VALUE)
+marfile: path to marker file (cols: MARKER VALUE)
 genfile: path to gene file (cols: GENE LOCUS)
 inffile: path to module info file (cols: MODULE DESCR)
 seed: seed for random number generator

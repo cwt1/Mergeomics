@@ -34,10 +34,10 @@ test_kda.analyze <- function() {
     ## results for our input sets:
     ## check FDRs of the top KD
     
-    checkEqualsNumeric(sort(job.kda$results$FDR)[1], 2.5e-15, 
-    tolerance=1.0e-4)
+    checkEqualsNumeric(sort(as.numeric(job.kda$results$FDR))[1], 
+    3.1492e-12, tolerance=1.0e-4)
     
     ## check Pvalues of the top KD
-    checkEqualsNumeric(sort(job.kda$results$P)[1], 1.4e-17, 
-    tolerance=1.0e-4)
+    checkEqualsNumeric(as.numeric(sort(job.kda$results$P))[1], 
+    1.2907e-14, tolerance=1.0e-4)
 }
