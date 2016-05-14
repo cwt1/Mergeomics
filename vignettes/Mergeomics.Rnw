@@ -75,15 +75,14 @@ Mergeomics package from
 
 http://mergeomics.research.idre.ucla.edu/Download/Package/
 
-Mergeomics\textunderscore 1.1.1.tar.gz 
-and install it using the following commands: 
+Mergeomics.tar.gz and install it using the following commands: 
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
-install.packages("Mergeomics_1.1.1.tar.gz", repos = NULL, 
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
+install.packages("Mergeomics.tar.gz", repos = NULL, 
 type="source")
 ## or from bioconductor3.3 release, use following lines:
-# source("https://bioconductor.org/biocLite.R")
-# biocLite("Mergeomics")
+source("https://bioconductor.org/biocLite.R")
+biocLite("Mergeomics")
 @
 
 However, if you want, you can also try out these examples with our webserver at
@@ -156,7 +155,7 @@ the pipeline will be described in detail in separate sections.
 The first way of one-step pipeline calling is given in the following 
 code chunk. It is achieved by one built-in function call (MSEA.KDA.onestep).
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 #######    One-step analysis for Mergeomics - 1st way    ##
 ###########################################################
@@ -243,7 +242,7 @@ The purpose of the MSEA is to leverage genome/epigenome wide association data,
 function genomics, canonical pathways and/or data-driven gene modules for 
 identifying causal subnetworks for disease/traits.
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 ## Import Mergeomics library.
 library("Mergeomics")
@@ -322,7 +321,7 @@ degree of redundancies, or refer to the same processes. In this case, users
 could merge the disease-related pathways into relatively independent gene 
 sets, which exceed a given FDR cutoff after running MSEA.
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 job <-list()
 job$folder <- c("module_merge")
@@ -372,7 +371,7 @@ association studies of different ethnicity, platform or even species, while
 evading the technical difficulties when performing meta-analysis directly 
 on the marker-level association data.
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 ## Assume there are three MSEA objects passed down by 
 ## ssea.finish()
@@ -393,7 +392,7 @@ In specific, wKDA first screen the network for candidate hub genes. Then
 the disease gene-sets are overlaid onto the subnetworks of the candidate
 hubs to identify key drivers whose neighbors are enriched with disease genes.
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 job.kda <- list()
 job.kda$label<-"HDLC"
@@ -475,12 +474,12 @@ hence, only the directly connected neighbor nodes of key drivers are taken
 into account).
 \end{itemize}
 
-<<echo=TRUE,print=FALSE,eval=TRUE,message=FALSE,warning=FALSE,results=hide>>=
+<<echo=TRUE,print=FALSE,eval=FALSE,message=FALSE,warning=FALSE,results=hide>>=
 ###########################################################
 ## run following line after finishing the KDA process
 ## i.e., after the kda.finish() function concluded
-# job.kda <- kda2cytoscape (job.kda, node.list=NULL, 
-# modules=NULL, ndrivers=5, depth=1)
+job.kda <- kda2cytoscape (job.kda, node.list=NULL, 
+modules=NULL, ndrivers=5, depth=1)
 ###########################################################
 @ 
 
