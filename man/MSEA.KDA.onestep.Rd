@@ -65,7 +65,7 @@ If MSEA is performed, results will include standard MSEA results (see
 \code{\link{ssea.analyze}} for details); if KDA is applied, results will
 include standard KDA results (see \code{\link{kda.analyze}} for details).}
 }
-\examples{
+\donttest{
 plan <- list()
 plan$label <- "hdlc"
 plan$folder <- "Results"

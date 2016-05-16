@@ -18,7 +18,7 @@ mechanistic hypotheses. It includes two main parts,
 \tabular{ll}{
 Package: \tab Mergeomics\cr
 Type: \tab Package\cr
-Version: \tab 1.1.2\cr
+Version: \tab 1.1.3\cr
 Date: \tab 2016-01-04\cr
 License: \tab GPL (>= 2)\cr
 Depends: R (>= 3.0.1)\cr
