@@ -65,7 +65,7 @@ If MSEA is performed, results will include standard MSEA results (see
 \code{\link{ssea.analyze}} for details); if KDA is applied, results will
 include standard KDA results (see \code{\link{kda.analyze}} for details).}
 }
-\donttest{
+\examples{
 plan <- list()
 plan$label <- "hdlc"
 plan$folder <- "Results"
@@ -78,8 +78,7 @@ plan$modfile <- system.file("extdata",
 plan$inffile <- system.file("extdata", 
 "coexpr.info.txt", package="Mergeomics")
 plan$nperm <- 100 ## default value is 20000
-
-plan <- MSEA.KDA.onestep(plan, apply.MSEA=TRUE)
+\donttest{plan <- MSEA.KDA.onestep(plan, apply.MSEA=TRUE)}
 }
 \references{
 Shu L, Zhao Y, Kurt Z, Byars S, Tukiainen T, Kettunen J, Ripatti S, Zhang B,
