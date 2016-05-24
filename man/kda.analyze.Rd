@@ -69,11 +69,13 @@ tool.save(moddata, "subsetof.supersets.txt")
 job.kda$modfile <- "subsetof.supersets.txt"
 
 ## Let's run KDA!
+\donttest{
 job.kda <- kda.configure(job.kda)
 job.kda <- kda.start(job.kda)
 job.kda <- kda.prepare(job.kda)
 job.kda <- kda.analyze(job.kda)
 job.kda <- kda.finish(job.kda)
+}
 
 ## Remove the temporary files used for the test:
 file.remove("subsetof.supersets.txt")
