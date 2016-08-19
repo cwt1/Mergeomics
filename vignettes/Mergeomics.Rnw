@@ -104,7 +104,7 @@ designed to integrate summary level data or curated resources, thus light
 data-preprocessing work is expected for user to convert datasets into 
 Mergeomics ready format. For the convenience of users, we also deposited a 
 rich collection of datasets that can be directly used for analysis in the 
-Mergeomics webserver. Of note, Mergeomics is not able to directly process raw
+Mergeomics webserver. Of note, Mergeomics is not able to directly process raw 
 data from omics studies (e.g., sequencing reads).
 
 Mergeomics calls for five types of datasets. All files should contain tab 
@@ -119,41 +119,41 @@ sample summary file from the Genome-wide association studies (GWAS) of
 high-density lipoprotein cholesterol (HDLC) from Global Lipids Genetics 
 Consortium [1].
 
-\textbf{2. Gene-marker mapping file: } Data that defines the mapping of genes
+\textbf{2. Gene-marker mapping file: } Data that defines the mapping of genes 
 and markers. Two columns are required, GENE and MARKER. Common resources for 
-the file is chromosomal distance based mapping, eQTL based mapping and ENCODE
-based mapping. The Mergeomics webserver provides a comprehensive collection of
-above-mentioned mapping files. Experienced users can also generate their own 
-mapping files from publicly available resources such as GTEx and ENCODE.The 
-package provides a sample mapping file where the GWAS loci were projected to
-genes within 40 Kb distance from gene region.
+the file is chromosomal distance based mapping, eQTL based mapping and ENCODE 
+based mapping. The Mergeomics webserver provides a comprehensive collection 
+of above-mentioned mapping files. Experienced users can also generate their 
+own mapping files from publicly available resources such as GTEx and ENCODE.
+The package provides a sample mapping file where the GWAS loci were projected 
+to genes within 40 Kb distance from gene region.
 
-\textbf{3. Functionally related gene-sets:}  Two columns are required, MODULE
+\textbf{3. Functionally related gene-sets:}  Two columns are required, MODULE 
 and GENE. The MODULE column defines the grouping of genes, normally by their 
 functional relatedness. Gene-sets can be derived from canonical pathways, 
 co-expression modules or differential genes under experimental conditions. 
 The sample gene-sets in the package is the coexpression networks re-constructed
-in mouse/human liver tissues, containing 2674 modules[2-6].
+ in mouse/human liver tissues, containing 2674 modules[2-6].
 
-\textbf{4. Gene regulatory networks:} Three columns are required, HEAD, TAIL
-and WEIGHT. If the user is using a directional network, then the starting nodes
-should be put in the HEAD column, while the ending nodes should be put in the
-TAIL column. If a non-directional network is used, users have to set the 
-corresponding wKDA parameter to “non-directional”, and are then safe to 
+\textbf{4. Gene regulatory networks:} Three columns are required, HEAD, TAIL 
+and WEIGHT. If the user is using a directional network, then the starting 
+nodes should be put in the HEAD column, while the ending nodes should be put 
+in the TAIL column. If a non-directional network is used, users have to set 
+the corresponding wKDA parameter to ``non-directional'', and are then safe to 
 switch the HEAD and TAIL column. The WEIGHT column normally contains the 
-confidence score or consensus score (if users merge multiple networks into
-one) of edges. If no weight information is available, simply fix all WEIGHT
-value to 1. The packages provides a sample Bayesian networks generated from
+confidence score or consensus score (if users merge multiple networks into 
+one) of edges. If no weight information is available, simply fix all WEIGHT 
+value to 1. The packages provides a sample Bayesian networks generated from 
 mouse/human liver tissues [2-6].
 
-\textbf{5. Marker dependency structure file (Optional):} This file is needed
-if users plan to use the MDPrune module. Three columns are required, MARKERa,
-MARKERb and WEIGHT. The WEIGHT column describes the degree of dependency (e.g.,
-linkage disequilibrium R2) between MARKERa and MARKERb.
+\textbf{5. Marker dependency structure file (Optional):} This file is needed 
+if users plan to use the MDPrune module. Three columns are required, MARKERa, 
+MARKERb and WEIGHT. The WEIGHT column describes the degree of dependency 
+(e.g., linkage disequilibrium R2) between MARKERa and MARKERb.
 
 \subsection{MDPrune}
 
-Before taking any further steps, we recommend users to preprocess datasets to
+Before taking any further steps, we recommend users to preprocess datasets to 
 filter dependency structure among markers (e.g. Linkage disequilibrium),
 as marker dependency may cause artifacts and biases in the downstream analysis.
 We have provided an external C++ program named MDPrune 
@@ -176,7 +176,7 @@ MAPFile is the Gene-marker mapping file;
 
 MDSFile is the marker dependency structure file.
 
-Here, we chose a moderate cutoff (R $>=$ 0.7) for 
+Here, we chose a moderate cutoff (R\texttwosuperior \textgreater 0.7) for 
 the dataset. 
 
 \subsection{One-step Mergeomics}
