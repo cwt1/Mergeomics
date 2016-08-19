@@ -97,27 +97,66 @@ The whole Mergeomics pipeline can be divided into two major components:
 (wKDA). In the following step, we will illustrate how to implement Mergeomics
 using one sample dataset, the descriptions of which are as follows. 
 
-\textbf{Marker-disease association summary result:} Genome-wide association 
-studies (GWAS) of high-density lipoprotein cholesterol (HDLC) from Global
-Lipids Genetics Consortium [1];
+\subsection{Input Data Preparation}
 
-\textbf{Gene-marker mapping file:} The GWAS loci were projected to genes 
-within 40 Kb distance from gene region;
+In this part we described the datasets used by Mergeomics. Mergeomics is 
+designed to integrate summary level data or curated resources, thus light 
+data-preprocessing work is expected for user to convert datasets into 
+Mergeomics ready format. For the convenience of users, we also deposited a 
+rich collection of datasets that can be directly used for analysis in the 
+Mergeomics webserver. Of note, Mergeomics is not able to directly process raw
+data from omics studies (e.g., sequencing reads).
 
-\textbf{Functionally related gene-sets:} The coexpression networks were
-reconstructed in mouse/human liver tissues, containing 2674 modules, were 
-adopted [2-6];
+Mergeomics calls for five types of datasets. All files should contain tab 
+delimited plain text.
 
-\textbf{Gene regulatory networks:} The Bayesian networks generated from 
-mouse/human liver tissues were included [2-6].
+\textbf{1. Marker-disease association summary result:} Summary result files 
+from association studies such as GWAS, TWAS or EWAS. Only two columns are 
+required, MARKER and VALUE. The MARKER column gives the IDs of the markers 
+(e.g., reference SNP ID), whereas the VALUE column contains the -log10 
+transformed association P values for the markers. The package provides a 
+sample summary file from the Genome-wide association studies (GWAS) of 
+high-density lipoprotein cholesterol (HDLC) from Global Lipids Genetics 
+Consortium [1].
 
-\subsection{Data Preprocessing}
+\textbf{2. Gene-marker mapping file: } Data that defines the mapping of genes
+and markers. Two columns are required, GENE and MARKER. Common resources for 
+the file is chromosomal distance based mapping, eQTL based mapping and ENCODE
+based mapping. The Mergeomics webserver provides a comprehensive collection of
+above-mentioned mapping files. Experienced users can also generate their own 
+mapping files from publicly available resources such as GTEx and ENCODE.The 
+package provides a sample mapping file where the GWAS loci were projected to
+genes within 40 Kb distance from gene region.
 
-Before we take any further steps, the datasets should be preprocessed and 
-filtered for dependency structure among markers (e.g. Linkage disequilibrium),
+\textbf{3. Functionally related gene-sets:}  Two columns are required, MODULE
+and GENE. The MODULE column defines the grouping of genes, normally by their 
+functional relatedness. Gene-sets can be derived from canonical pathways, 
+co-expression modules or differential genes under experimental conditions. 
+The sample gene-sets in the package is the coexpression networks re-constructed
+in mouse/human liver tissues, containing 2674 modules[2-6].
+
+\textbf{4. Gene regulatory networks:} Three columns are required, HEAD, TAIL
+and WEIGHT. If the user is using a directional network, then the starting nodes
+should be put in the HEAD column, while the ending nodes should be put in the
+TAIL column. If a non-directional network is used, users have to set the 
+corresponding wKDA parameter to “non-directional”, and are then safe to 
+switch the HEAD and TAIL column. The WEIGHT column normally contains the 
+confidence score or consensus score (if users merge multiple networks into
+one) of edges. If no weight information is available, simply fix all WEIGHT
+value to 1. The packages provides a sample Bayesian networks generated from
+mouse/human liver tissues [2-6].
+
+\textbf{5. Marker dependency structure file (Optional):} This file is needed
+if users plan to use the MDPrune module. Three columns are required, MARKERa,
+MARKERb and WEIGHT. The WEIGHT column describes the degree of dependency (e.g.,
+linkage disequilibrium R2) between MARKERa and MARKERb.
+
+\subsection{MDPrune}
+
+Before taking any further steps, we recommend users to preprocess datasets to
+filter dependency structure among markers (e.g. Linkage disequilibrium),
 as marker dependency may cause artifacts and biases in the downstream analysis.
 We have provided an external C++ program named MDPrune 
-
 (http://mergeomics.research.idre.ucla.edu/Download/MDPrune/), which can remove
 marker dependency while preferentially keeping those with a
 strong statistical association with traits.
@@ -128,17 +167,17 @@ The commands are listed as follows:
 mdprune MARFile MAPFile MDSFile OutPath [Cutoff]
 \end{center}
 
-All files should contain tab delimited plain text where;
+The file format request for MDPrune is the same as main Mergeomics pipeline, 
+where;
 
-MARFile is the association study summary file where the VALUE column 
-contains the -log10 association P values. 
+MARFile is the association study summary file 
 
-MAPFile is the Marker-Gene mapping file;  
+MAPFile is the Gene-marker mapping file;  
 
-MDSFile is the marker dependency structure file (MARKERa MARKERb WEIGHT).
+MDSFile is the marker dependency structure file.
 
-Here, we chose a moderate cutoff (R\texttwosuperior \textgreater 0.7) for 
-the dataset.
+Here, we chose a moderate cutoff (R $>=$ 0.7) for 
+the dataset. 
 
 \subsection{One-step Mergeomics}
 
@@ -180,7 +219,10 @@ plan$netfile <- system.file("extdata",
 
 ## second, define pipeline parameters (e.g. permutation #, seed for random #
 ## generator, min and max module sizes, max overlapping ratio, etc.)
+plan$permtype <- "gene" ## default setting is gene permutation
 plan$nperm <- 100 ## default value is 20000
+plan$mingenes <- 10   ## default value is 10
+plan$maxgenes <- 500   ## default value is 500
 
 ## then, call the one-step pipeline function including both MSEA and KDA steps
 plan <- MSEA.KDA.onestep(plan, apply.MSEA=TRUE, apply.KDA=TRUE, 
@@ -255,6 +297,11 @@ job.msea$label <- "HDLC"
 ## min. (mingenes) and max. (maxgenes) gene size for the pathways.
 job.msea$maxgenes <- 500
 job.msea$mingenes <- 10
+## The permutation setting and number of permutations. We recommend 
+## using gene permutation due to its robust performance. 
+## The alternative is locus permutation.
+job.msea$permtype <- "gene"
+job.msea$nperm <- 100
 ## set the output folder
 job.msea$folder <- "./Results"
 ## The parameter genfile defines the Marker-to-Gene mapping file
@@ -412,7 +459,7 @@ job.kda$inffile<-system.file("extdata",
 "mergedModules.info.txt", package="Mergeomics")
 ## "0" means we do not consider edge weights while 1 is 
 ## opposite.
-job.kda$edgefactor<-0.0
+job.kda$edgefactor<-0.5
 ## The searching depth for the KDA
 job.kda$depth<-1
 ## "0" means we do not consider the directions of the 
@@ -540,6 +587,7 @@ to identify pathogenic perturbations to biological systems.
 bioRxiv doi: http://dx.doi.org/10.1101/036012.
 
 \section{References}
+
 [1] Willer CJ, Schmidt EM, Sengupta S, Peloso GM, Gustafsson S, et al. (2013)
 Discovery and refinement of loci associated with lipid levels. 
 Nature Genetics 45.
