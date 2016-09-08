@@ -268,7 +268,11 @@ syms <- syms[,c("HUMAN", "MOUSE")]
 names(syms) <- c("FROM", "TO")
 
 ## default and recommended rmax=0.33.
-job.kda <- ssea2kda(job.msea, rmax=0.2, symbols=syms) 
+## min.module.count is the number of the pathways to be taken from the MSEA
+## results to merge. If it is not specified (NULL), all the pathways having 
+## MSEA-FDR value less than 0.25 will be considered for merging if they are 
+## overlapping with the given ratio rmax. 
+job.kda <- ssea2kda(job.msea, rmax=0.2, symbols=syms, min.module.count=NULL) 
 #######   wKDA (Weighted key driver analysis)    ##########
 job.kda$netfile <- system.file("extdata", 
 "network.mouseliver.mouse.txt", package="Mergeomics")
