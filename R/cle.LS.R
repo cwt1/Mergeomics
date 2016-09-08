@@ -1465,7 +1465,7 @@ kda.start.identify <- function(dat, varname, labels) {
 #
 # Written by Ville-Petteri Makinen 2013
 #
-ssea2kda <- function(job, symbols=NULL, rmax=NULL) {
+ssea2kda <- function(job, symbols=NULL, rmax=NULL, min.module.count=NULL) {
     cat("\nForwarding MSEA results to KDA...\n")
     if(is.null(rmax)) rmax <- 0.33
     
@@ -1476,7 +1476,8 @@ ssea2kda <- function(job, symbols=NULL, rmax=NULL) {
     res <- job$results
     res <- res[order(res$P),]
     rows <- which(res$FDR < 0.25)
-    if(length(rows) < 20) rows <- (1:20)
+    if(!is.null(min.module.count))
+        if(length(rows) < min.module.count) rows <- (1:min.module.count)
     if(length(rows) < nrow(res)) res <- res[rows,]
     
     # Collect member genes.

@@ -13,7 +13,6 @@ test_ssea.analyze <- function() {
     job.msea$inffile <- system.file("extdata", 
     "coexpr.info.txt", package="Mergeomics")
     job.msea$nperm <- 100 ## default value is 20000
-    set.seed(1)
     
     ## run ssea.start() 
     job.msea <- ssea.start(job.msea)
@@ -25,6 +24,6 @@ test_ssea.analyze <- function() {
     ## since we set the seed for random # generation, we know the exact
     ## results for our input sets:
     checkEqualsNumeric(sort(as.numeric(job.msea$results$P))[1], 
-    3.1386e-13, tolerance=1.0e-4)
+    3.67e-33, tolerance=1.0e-4)
 
 }

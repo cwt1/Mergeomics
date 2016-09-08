@@ -11,7 +11,7 @@ apply a second MSEA on the merged modules (supersets), updates and saves
 the second MSEA results properly for wKDA process.
 }
 \usage{
-ssea2kda(job, symbols = NULL, rmax = NULL)
+ssea2kda(job, symbols = NULL, rmax = NULL, min.module.count=NULL)
 }
 \arguments{
 \item{job}{data list including the organized results of MSEA process. It 
@@ -33,16 +33,23 @@ marker value (VALUE).
 dataframe for translating gene symbols
 }
 \item{rmax}{
-maximum allowed overlap between gene sets
+maximum allowed overlap ratio between gene sets
+}
+\item{min.module.count}{
+minimum number of the pathways to be taken from the MSEA results to merge.
+Default value is NULL. If it is not specified, all the pathways having MSEA-FDR 
+value less than 0.25 will be considered for merging if they are overlapping 
+with the given ratio \code{rmax}. 
 }
 }
 \details{
 \code{ssea2kda} gets genes and top markers from input files, selects 
-significant modules with respect to ordered p-values and FDR values, gets 
-identities of modules and genes, merges and trims the overlapping modules,
-obtains enrichment scores for merged modules, separates merged genes and 
-translates their symbols, and finally saves the module information, as 
-well as the gene, node, and marker information into relevant output files. 
+significant modules with respect to ordered p-values, gets identities of 
+modules and genes, merges and trims the overlapping modules (either having FDR
+less than 0.25 or top \code{min.module.count} modules when ranked up to the
+P-values), obtains enrichment scores for merged modules, translates the gene 
+symbols (between species) if needed, and finally saves the module, gene, node, 
+and marker information into relevant output files. 
 }
 \value{
 \item{plan }{an updated data list with the following components: 

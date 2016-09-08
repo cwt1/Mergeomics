@@ -226,8 +226,11 @@ plan$maxgenes <- 500   ## default value is 500
 
 ## then, call the one-step pipeline function including both MSEA and KDA steps
 plan <- MSEA.KDA.onestep(plan, apply.MSEA=TRUE, apply.KDA=TRUE, 
-maxoverlap.genesets=0.33, symbol.transfer.needed=TRUE, 
+maxoverlap.genesets=0.20, symbol.transfer.needed=TRUE, 
 sym.from=c("HUMAN", "MOUSE"), sym.to=c("HUMAN", "MOUSE"))
+## NOTE: default value of maxoverlap.genesets=0.33; but in all the examples of
+## this tutorial it is 0.2 (see job.msea$rmax<- 0.2 in the following example)
+## maxoverlap.genesets=0.33 (or job.msea$rmax<- 0.33) is recommended to use.
 @
 
 The second way of one-step pipeline calling is given in the following 
@@ -252,6 +255,7 @@ job.msea$modfile <- system.file("extdata",
 "modules.mousecoexpr.liver.human.txt", package="Mergeomics")
 job.msea$inffile <- system.file("extdata", "coexpr.info.txt", 
 package="Mergeomics")
+job.msea$nperm <- 100 ## default value is 20000 (this is recommended)
 job.msea <- ssea.start(job.msea)
 job.msea <- ssea.prepare(job.msea)
 job.msea <- ssea.control(job.msea)
@@ -262,7 +266,9 @@ syms <- tool.read(system.file("extdata", "symbols.txt",
 package="Mergeomics"))
 syms <- syms[,c("HUMAN", "MOUSE")]
 names(syms) <- c("FROM", "TO")
-job.kda <- ssea2kda(job.msea, symbols=syms)
+
+## default and recommended rmax=0.33.
+job.kda <- ssea2kda(job.msea, rmax=0.2, symbols=syms) 
 #######   wKDA (Weighted key driver analysis)    ##########
 job.kda$netfile <- system.file("extdata", 
 "network.mouseliver.mouse.txt", package="Mergeomics")
@@ -301,7 +307,7 @@ job.msea$mingenes <- 10
 ## using gene permutation due to its robust performance. 
 ## The alternative is locus permutation.
 job.msea$permtype <- "gene"
-job.msea$nperm <- 100
+job.msea$nperm <- 100 ## default value is 20000 (this is recommended)
 ## set the output folder
 job.msea$folder <- "./Results"
 ## The parameter genfile defines the Marker-to-Gene mapping file
@@ -372,11 +378,15 @@ sets, which exceed a given FDR cutoff after running MSEA.
 ###########################################################
 job <-list()
 job$folder <- c("module_merge")
-## The moddata and modinfo come from the significant pathways in MSEA
+## The moddata and modinfo either come from the significant pathways found in
+## any previous MSEA run or these files can be manually curated by the user.
+## moddata is an obligatory input file; while modinfo is an optional input.
 ## It is recommended to merge the overlapping pathways among significant
-## ones before applying KDA to provide proceeding with independent gene sets
+## ones before applying KDA to proceed with the independent gene sets.
 moddata <- tool.read(system.file("extdata", "Significant_pathways.txt",
 package="Mergeomics"), c("MODULE","GENE"))
+modinfo <- tool.read(system.file("extdata", "Significant_pathways.info.txt",
+package="Mergeomics"),c("MODULE","SOURCE","DESCR"))
 
 syms <- tool.read(system.file("extdata", "symbols.txt", 
 package="Mergeomics"))
@@ -395,14 +405,22 @@ moddata$GENE <- moddata$ITEM
 moddata$OVERLAP <- moddata$GROUPS
 moddata <- moddata[,c("MODULE", "GENE", "OVERLAP")]
 moddata <- unique(moddata)
+modinfo <- modinfo[which(!is.na(match(modinfo[,1], moddata[,1]))), ]
+
 ## Mark modules with overlaps.
-for(i in which(moddata$MODULE != moddata$OVERLAP))
+for(i in which(moddata$MODULE != moddata$OVERLAP)){
+    modinfo[which(modinfo[,"MODULE"] == moddata[i,"MODULE"]), 
+            "MODULE"] <- paste(moddata[i,"MODULE"], "..", sep=",")
     moddata[i,"MODULE"] <- paste(moddata[i,"MODULE"], "..", sep=",")
-## Save module info for KDA.
+}
+## Save merged module data and info for KDA.
 modfile <- "mergedModules.txt"
+modinfofile <- "mergedModules.info.txt"
 moddata$NODE <- moddata$GENE
 tool.save(frame=unique(moddata[,c("MODULE", "GENE", "OVERLAP", "NODE")]),
 file=modfile, directory=job$folder)
+tool.save(frame=unique(modinfo[,c("MODULE","SOURCE","DESCR")]),
+file=modinfofile, directory=job$folder)
 ###########################################################
 @
 
@@ -459,13 +477,13 @@ job.kda$inffile<-system.file("extdata",
 "mergedModules.info.txt", package="Mergeomics")
 ## "0" means we do not consider edge weights while 1 is 
 ## opposite.
-job.kda$edgefactor<-0.5
+job.kda$edgefactor<-0.5 ## default value
 ## The searching depth for the KDA
-job.kda$depth<-1
+job.kda$depth<-1 ## default value
 ## "0" means we do not consider the directions of the 
 ## regulatory interactions
 ## while 1 is opposite.
-job.kda$direction<-0
+job.kda$direction<-0 ## default value
 ## Let us run KDA!
 job.kda <- kda.configure(job.kda)
 job.kda <- kda.start(job.kda)
@@ -536,10 +554,12 @@ Generated file names and their descriptions are given below:
 \item \textbf{kda2cytoscape.top.kds.txt:} Top KDs of the modules are listed 
 in this file. Number of the key drivers can be set by user with ``ndrivers''
 parameter.
-\item \textbf{kda2cytoscape.edges.txt:} Edge lists of the generated graph.
+\item \textbf{kda2cytoscape.edges.txt:} Edge lists of the generated graph. 
+This file should be imported as network within the Cytoscape.
 \item \textbf{kda2cytoscape.nodes.txt:} Node lists of the generated graph. 
 This file includes the optional formatting information for the nodes of the
-graph. Field/attribute list provided for each node is as follows:
+graph. It should be imported as node table within the Cytoscape. 
+Field/attribute list provided for each node is as follows:
 \begin{itemize}
 \item NODE: gene symbol
 \item LABEL: node label (same as above)
