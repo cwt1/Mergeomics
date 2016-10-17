@@ -1,0 +1,19 @@
+Package: Mergeomics
+Type: Package
+Title: Integrative network analysis of omics data
+Version: 1.2.0
+Date: 2016-01-04
+Author: Ville-Petteri Makinen, Le Shu, Yuqi Zhao, Zeyneb Kurt, Bin Zhang,
+    Xia Yang
+Maintainer: Zeyneb Kurt <zeyneb@ucla.edu>
+Description: The Mergeomics pipeline serves as a flexible framework for 
+    integrating multidimensional omics-disease associations, functional
+    genomics,  canonical pathways and gene-gene interaction networks to
+    generate mechanistic hypotheses. It includes two main parts,
+    1) Marker set enrichment analysis (MSEA); 
+    2) Weighted Key Driver Analysis (wKDA). 
+biocViews: Software
+Suggests: RUnit, BiocGenerics
+License: GPL (>= 2)
+Depends: R (>= 3.0.1)
+Packaged: 2016-01-06 22:27:25 UTC; zeynebku
