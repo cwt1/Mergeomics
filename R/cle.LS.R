@@ -1685,9 +1685,9 @@ ssea2kda.analyze <- function(job, moddata) {
 #                  P         enrichment P-values
 #                  FREQ      enrichment P-values (raw frequencies)
 #
-# Written by Ville-Petteri Makinen 2013
+# Written by Ville-Petteri Makinen 2013, Modified by Le Shu 2016
 #
-ssea.analyze <- function(job) {
+ssea.analyze <- function(job, trim_start=0.002, trim_end=0.998) {
     cat("\nEstimating enrichment...\n")  
     set.seed(job$seed)
     
@@ -1698,7 +1698,7 @@ ssea.analyze <- function(job) {
     
     # Simulated scores.
     nperm <- job$nperm
-    nullsets <- ssea.analyze.simulate(db, scores, nperm, job$permtype)
+    nullsets <- ssea.analyze.simulate(db, scores, nperm, job$permtype, trim_start, trim_end)
     
     # Estimate scores based on Gaussian distribution.
     cat("\nNormalizing scores...\n")
@@ -1750,8 +1750,42 @@ ssea.analyze <- function(job) {
 
 #----------------------------------------------------------------------------
 
-ssea.analyze.simulate <- function(db, observ, nperm, permtype) {
-    
+ssea.analyze.simulate <- function(db, observ, nperm, permtype, trim_start, trim_end) {
+
+    #############################################################################
+	#####This is an additional process to trim genes with exceptionally high value####
+	###################################################################################
+	gene2loci <- db$gene2loci
+	locus2row <- db$locus2row
+	observed <- db$observed
+    #Calcuate individual gene enrichment score
+	trim_scores <- rep(NA, length(gene2loci))
+	
+	for(k in 1:length(trim_scores)) {
+        genes <- k
+        
+        # Collect markers.
+        loci <- integer()
+        for(i in genes) 
+            loci <- c(loci, gene2loci[[i]])
+        
+        # Determine data rows.
+        loci <- unique(loci)
+        rows <- locus2row[loci]
+        nloci <- length(rows)
+        
+        # Calculate total counts.
+        e <- (nloci/length(locus2row))*colSums(observed)
+        o <- observed[rows,]
+        if(nloci > 1) o <- colSums(o)
+        
+        # Estimate enrichment.
+        trim_scores[k] <- ssea.analyze.statistic(o, e)
+    }
+	cutoff=as.numeric(quantile(trim_scores,probs=c(trim_start,trim_end)))
+	gene_sel=which(trim_scores>cutoff[1]&trim_scores<cutoff[2])
+	
+	
     # Include only non-empty modules for simulation.
     nmods <- length(db$modulesizes)
     targets <- which(db$modulesizes > 0)
@@ -1770,7 +1804,7 @@ ssea.analyze.simulate <- function(db, observ, nperm, permtype) {
     snull <- double()
     stamp <- Sys.time()
     for(k in 1:nperm) {
-        if(permtype == "gene") snull <- ssea.analyze.randgenes(db, targets)
+        if(permtype == "gene") snull <- ssea.analyze.randgenes(db, targets, gene_sel)
         if(permtype == "locus") snull <- ssea.analyze.randloci(db, targets)
         if(length(snull) < 1) stop("Unknown permutation type.")
         
@@ -1844,7 +1878,8 @@ ssea.analyze.observe <- function(db) {
         nloci <- length(rows)    
         
         # Calculate total counts.
-        e <- nloci*expected
+        #e <- nloci*expected
+		e <- (nloci/length(locus2row))*colSums(observed)
         o <- observed[rows,]
         if(nloci > 1) o <- colSums(o)
         
@@ -1856,7 +1891,7 @@ ssea.analyze.observe <- function(db) {
 
 #----------------------------------------------------------------------------
 
-ssea.analyze.randgenes <- function(db, targets) {
+ssea.analyze.randgenes <- function(db, targets, gene_sel) {
     mod2gen <- db$module2genes
     modsizes <- db$modulesizes
     modlengths <- db$modulelengths
@@ -1868,21 +1903,22 @@ ssea.analyze.randgenes <- function(db, targets) {
     # Test target modules.
     scores <- double()
     nrows <- length(locus2row)
-    npool <- length(gene2loci)
+    #npool <- length(gene2loci)
     for(k in targets) {
         msize <- modsizes[[k]]
         nloci <- modlengths[[k]]
         
         # Collect pre-defined number of markers from random genes.
         loci <- integer()
-        genes <- sample.int(npool, (msize + 10))
+        #genes <- sample.int(npool, (msize + 10))
+		genes <- sample(gene_sel, (msize + 10))
         while(length(loci) < nloci) {
             for(i in genes) {
                 tmp <- gene2loci[[i]]
                 loci <- c(loci, tmp)
             }
             loci <- unique(loci)
-            genes <- sample.int(npool, msize)
+            genes <- sample(gene_sel, (msize + 10))
         }
         
         # Determine data rows.
@@ -1890,7 +1926,8 @@ ssea.analyze.randgenes <- function(db, targets) {
         rows <- locus2row[loci]
         
         # Calculate total counts.
-        e <- nloci*expected
+        #e <- nloci*expected
+		e <- (nloci/length(locus2row))*colSums(observed)
         o <- observed[rows,]
         if(nloci > 1) o <- colSums(o)
         
@@ -1920,7 +1957,8 @@ ssea.analyze.randloci <- function(db, targets) {
         rows <- locus2row[loci]
         
         # Calculate total counts.
-        e <- nloci*expected
+        #e <- nloci*expected
+		e <- (nloci/length(locus2row))*colSums(observed)
         o <- observed[rows,]
         if(nloci > 1) o <- colSums(o)
         

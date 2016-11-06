@@ -23,7 +23,7 @@ test_ssea.analyze <- function() {
     ## compare the pvals with the expected ones:
     ## since we set the seed for random # generation, we know the exact
     ## results for our input sets:
-    checkEqualsNumeric(sort(as.numeric(job.msea$results$P))[1], 
-    3.67e-33, tolerance=1.0e-4)
+    checkEqualsNumeric(sort(as.numeric(job.msea$results$P))[2], 
+    2.25e-60, tolerance=1.0e-4)
 
 }

@@ -46,10 +46,10 @@ data(job_kda_analyze)
 # }
 }
 \references{
-Shu L, Zhao Y, Kurt Z, Byars S, Tukiainen T, Kettunen J, Ripatti S, Zhang B,
-Inouye M, Makinen VP, Yang X. Mergeomics: integration of diverse genomics
-resources to identify pathogenic perturbations to biological systems.
-bioRxiv doi: http://dx.doi.org/10.1101/036012
+Shu L, Zhao Y, Kurt Z, Byars SG, Tukiainen T, Kettunen J, Orozco LD, 
+Pellegrini M, Lusis AJ, Ripatti S, Zhang B, Inouye M, Makinen V-P, Yang X.
+Mergeomics: multidimensional data integration to identify pathogenic 
+perturbations to biological systems. BMC genomics. 2016;17(1):874.
 }
 \author{
 Ville-Petteri Makinen 

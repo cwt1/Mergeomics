@@ -9,7 +9,7 @@ randomly permuting database with respect to the specified permutation
 type (either gene-level or marker-level).
 }
 \usage{
-ssea.analyze.simulate(db, observ, nperm, permtype)
+ssea.analyze.simulate(db, observ, nperm, permtype, trim_start, trim_end)
 }
 \arguments{
 \item{db}{
@@ -37,6 +37,16 @@ maximum nubmer of permutations (for simulation)
 }
 \item{permtype}{
 permutation type (either gene or locus)
+}
+\item{trim_start}{percentile taken from the beginning for 
+trimming away a defined proportion of genes with significant trait 
+association to avoid signal inflation of null background in gene permutation.
+Default value is 0.002.
+}
+\item{trim_end}{percentile taken from the ending point for 
+trimming away a defined proportion of genes with significant trait 
+association to avoid signal inflation of null background in gene permutation.
+Default value is 0.998.
 }
 }
 \value{
@@ -92,7 +102,10 @@ nmods <- length(scores)
 
 ## Simulated scores.
 nperm <- job.msea$nperm
-nullsets <- ssea.analyze.simulate(db, scores, nperm, job.msea$permtype)
+trim_start=0.002 # default
+trim_end=1-trim_start
+nullsets <- ssea.analyze.simulate(db, scores, nperm, job.msea$permtype,
+trim_start, trim_end)
 
 ## Remove the temporary files used for the test:
 file.remove("subsetof.coexpr.modules.txt")
@@ -100,10 +113,10 @@ file.remove("subsetof.genfile.txt")
 file.remove("subsetof.marfile.txt")
 }
 \references{
-Shu L, Zhao Y, Kurt Z, Byars S, Tukiainen T, Kettunen J, Ripatti S, Zhang B,
-Inouye M, Makinen VP, Yang X. Mergeomics: integration of diverse genomics
-resources to identify pathogenic perturbations to biological systems.
-bioRxiv doi: http://dx.doi.org/10.1101/036012
+Shu L, Zhao Y, Kurt Z, Byars SG, Tukiainen T, Kettunen J, Orozco LD, 
+Pellegrini M, Lusis AJ, Ripatti S, Zhang B, Inouye M, Makinen V-P, Yang X.
+Mergeomics: multidimensional data integration to identify pathogenic 
+perturbations to biological systems. BMC genomics. 2016;17(1):874.
 }
 \author{
 Ville-Petteri Makinen 

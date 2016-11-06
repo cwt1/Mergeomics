@@ -8,7 +8,7 @@ Estimate enrichment from randomized genes
 randomizing the genes from all modules (from database - db)
 }
 \usage{
-ssea.analyze.randgenes(db, targets)
+ssea.analyze.randgenes(db, targets, gene_sel)
 }
 \arguments{
 \item{db}{
@@ -29,6 +29,9 @@ expected: 1.0 - quantile points.
 }
 } 
 \item{targets}{all modules}
+\item{gene_sel}{selected genes to be trimmed away to avoid signal inflation
+ of null background in gene permutation.
+}
 }
 \value{
 \item{scores }{randomly simulated enrichment scores}
@@ -77,6 +80,36 @@ job.msea <- ssea.control(job.msea)
 
 ## Observed enrichment scores.
 db <- job.msea$database
+gene2loci <- db$gene2loci
+locus2row <- db$locus2row
+observed <- db$observed
+#Calcuate individual gene enrichment score
+trim_scores <- rep(NA, length(gene2loci))
+for(k in 1:length(trim_scores)) {
+  genes <- k
+  # Collect markers.
+  loci <- integer()
+  for(i in genes) 
+    loci <- c(loci, gene2loci[[i]])
+        
+  # Determine data rows.
+  loci <- unique(loci)
+  rows <- locus2row[loci]
+  nloci <- length(rows)
+        
+  # Calculate total counts.
+  e <- (nloci/length(locus2row))*colSums(observed)
+  o <- observed[rows,]
+  if(nloci > 1) o <- colSums(o)
+        
+  # Estimate enrichment.
+  trim_scores[k] <- ssea.analyze.statistic(o, e)
+}
+trim_start=0.002 # default
+trim_end=1-trim_start
+cutoff=as.numeric(quantile(trim_scores,probs=c(trim_start,trim_end)))
+gene_sel=which(trim_scores>cutoff[1]&trim_scores<cutoff[2])
+
 scores <- ssea.analyze.observe(db)
 nmods <- length(scores)
 
@@ -97,7 +130,7 @@ for(i in 1:nmods) scoresets[[i]] <- double()
 ## Simulate random scores.
 ## within a for loop: check capacity, find new statistics, update snull  
 ## distribution (simulated null distr.) by permuting genes
-snull <- ssea.analyze.randgenes(db, targets)
+snull <- ssea.analyze.randgenes(db, targets, gene_sel)
 
 ## Remove the temporary files used for the test:
 file.remove("subsetof.coexpr.modules.txt")
@@ -105,10 +138,10 @@ file.remove("subsetof.genfile.txt")
 file.remove("subsetof.marfile.txt")
 }
 \references{
-Shu L, Zhao Y, Kurt Z, Byars S, Tukiainen T, Kettunen J, Ripatti S, Zhang B,
-Inouye M, Makinen VP, Yang X. Mergeomics: integration of diverse genomics
-resources to identify pathogenic perturbations to biological systems.
-bioRxiv doi: http://dx.doi.org/10.1101/036012
+Shu L, Zhao Y, Kurt Z, Byars SG, Tukiainen T, Kettunen J, Orozco LD, 
+Pellegrini M, Lusis AJ, Ripatti S, Zhang B, Inouye M, Makinen V-P, Yang X.
+Mergeomics: multidimensional data integration to identify pathogenic 
+perturbations to biological systems. BMC genomics. 2016;17(1):874.
 }
 \author{
 Ville-Petteri Makinen 

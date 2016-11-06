@@ -17,7 +17,7 @@ MSEA is performed with either gene-level or marker-level permutations
 based on Gaussian distribution. 
 }
 \usage{
-ssea.analyze(job)
+ssea.analyze(job, trim_start, trim_end)
 }
 \arguments{
 \item{job}{
@@ -28,6 +28,16 @@ the same input set is given), random permutation level
 of permutations \code{(job$nperm)} for the permutation test, and the
 database that uses indexed identities for modules, genes, and markers
 (e.g. loci) \code{(job$database)}.  
+}
+\item{trim_start}{percentile taken from the beginning for 
+trimming away a defined proportion of genes with significant trait 
+association to avoid signal inflation of null background in gene permutation.
+Default value is 0.002.
+}
+\item{trim_end}{percentile taken from the ending point for 
+trimming away a defined proportion of genes with significant trait 
+association to avoid signal inflation of null background in gene permutation.
+Default value is 0.998.
 }
 }
 \details{
@@ -41,6 +51,9 @@ loci) are calculated. Then, a Gaussian distribution based simulation is
 performed, by using the statistics of the observed scores (mean, std.dev.,
 etc.), to obtain the estimated enrichment scores, enrichment frequencies,
 and other statistics e.g. p-values for the pathways.
+\code{ssea.analyze} trims away a defined proportion of genes with 
+significant trait association to avoid signal inflation of null background 
+in gene permutation by using \code{trim_start} and \code{trim_end}.
 }
 \value{
 \item{job }{the updated data frame including results: indexed module 
@@ -98,10 +111,10 @@ file.remove("subsetof.genfile.txt")
 file.remove("subsetof.marfile.txt")
 }
 \references{
-Shu L, Zhao Y, Kurt Z, Byars S, Tukiainen T, Kettunen J, Ripatti S, Zhang B,
-Inouye M, Makinen VP, Yang X. Mergeomics: integration of diverse genomics
-resources to identify pathogenic perturbations to biological systems.
-bioRxiv doi: http://dx.doi.org/10.1101/036012
+Shu L, Zhao Y, Kurt Z, Byars SG, Tukiainen T, Kettunen J, Orozco LD, 
+Pellegrini M, Lusis AJ, Ripatti S, Zhang B, Inouye M, Makinen V-P, Yang X.
+Mergeomics: multidimensional data integration to identify pathogenic 
+perturbations to biological systems. BMC genomics. 2016;17(1):874.
 }
 \author{
 Ville-Petteri Makinen 
